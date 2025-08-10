@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Quantum Student Portal</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-900 text-white font-sans p-6">
+  <h1 class="text-4xl font-bold text-center text-blue-400 mb-8">TJPS STUDENT PORTAL</h1>
+
+  <div class="flex gap-6">
+    <!-- Left panel -->
+    <div class="w-1/5 bg-gray-800 p-4 rounded-xl shadow-md h-fit">
+      <h2 class="text-2xl font-bold mb-4 text-blue-300">Years List</h2>
+      <h1 class="text-2xl mb-4 text-blue-400">File Explorer</h1>
+      <div class="bg-gray-800 rounded p-4">
+        <ul class="space-y-2">
+          {% if current_path %}
+          <li>
+            <a href="{{ url_for('browse_files', req_path=current_path.rsplit('/', 1)[0]) }}" class="text-blue-300 hover:underline">⬅️ Back</a>
+          </li>
+          {% endif %}
+          {% for item in contents %}
+          <li>
+            {% if item.is_dir %}
+              📁 <a href="{{ url_for('browse_files', req_path=item.path) }}" class="text-blue-200 hover:underline">{{ item.name }}</a>
+            {% else %}
+              📄 <span class="text-gray-300">{{ item.name }}</span>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+
+    <!-- Center panel -->
+    <div class="w-4/5">
+      <!-- Search -->
+      <form method="POST" class="mb-8">
+        <div class="flex gap-4">
+          <input type="text" name="rollNumber" placeholder="Enter Roll Number"
+            class="flex-1 bg-gray-800 border border-blue-500 px-4 py-3 rounded-lg text-white focus:outline-none"
+            required />
+          <button type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg">
+            SEARCH STUDENT
+          </button>
+        </div>
+      </form>
+
+      <!-- Range + Next -->
+      <form method="POST" class="mb-8">
+        <div class="flex gap-4">
+          <input type="text" name="startRollNumber" placeholder="Start Roll Number"
+            class="flex-1 bg-gray-800 border border-blue-500 px-4 py-3 rounded-lg text-white focus:outline-none"
+            required />
+          <input type="text" name="endRollNumber" placeholder="End Roll Number"
+            class="flex-1 bg-gray-800 border border-blue-500 px-4 py-3 rounded-lg text-white focus:outline-none"
+            required />
+          <button type="submit"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg">
+            SEARCH RANGE
+          </button>
+          <button type="button"
+            onclick="window.location.href='/next'"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg">
+            NEXT STUDENT
+          </button>
+        </div>
+      </form>
+
+      <!-- Single Student Display -->
+      {% if student %}
+      <div class="bg-gray-800 rounded-xl p-8 shadow-xl mb-12">
+        <div class="flex gap-12">
+          <div>
+            <img src="{{ student.photo }}" alt="Student Photo"
+              class="w-40 h-40 object-cover rounded-xl border-4 border-blue-500 shadow-md" />
+          </div>
+          <div class="flex-1 grid grid-cols-2 gap-6 text-lg">
+            <p><strong>Roll No:</strong> {{ student.rollNumber }}</p>
+            <p><strong>Hall Ticket:</strong> {{ student.hallTicket }}</p>
+            <p><strong>First Name:</strong> {{ student.firstName }}</p>
+            <p><strong>Last Name:</strong> {{ student.lastName }}</p>
+            <p><strong>Phone:</strong> {{ student.phoneNumber }}</p>
+            <p><strong>City:</strong> {{ student.city }}</p>
+            <p><strong>Parent Phone:</strong> {{ student.parentPhone }}</p>
+            <p><strong>Percentage:</strong> {{ student.percentage }}%</p>
+          </div>
+        </div>
+
+        <div class="mt-10">
+          <h2 class="text-2xl font-bold mb-4 text-blue-300">Subject-wise Marks</h2>
+          <div class="grid grid-cols-2 gap-4 text-base">
+            {% for subject, mark in student.marks.items() %}
+            <div class="bg-gray-700 p-4 rounded-md shadow-sm">
+              <strong>{{ subject }}:</strong> {{ mark }}
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+      {% endif %}
+
+      <!-- All Students List (Default or Range) -->
+      {% if students %}
+      <div class="bg-gray-800 p-6 rounded-xl shadow-lg">
+        <h2 class="text-2xl font-bold mb-4 text-blue-300">All Students</h2>
+        <div class="flex flex-col gap-4 text-base">
+          {% for s in students %}
+          <form method="POST">
+            <input type="hidden" name="rollNumber" value="{{ s.rollNumber }}">
+            <button type="submit" class="w-full text-left bg-gray-700 hover:bg-gray-600 p-4 rounded-md shadow-sm">
+              <div><strong>{{ s.rollNumber }}</strong>: {{ s.firstName }} {{ s.lastName }}</div>
+              <div class="text-sm text-gray-300">Percentage: {{ s.percentage }}%</div>
+            </button>
+          </form>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</body>
+</html>
